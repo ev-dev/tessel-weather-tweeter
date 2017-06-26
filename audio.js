@@ -1,36 +1,61 @@
 'use strict';
-const path = require('path');
 const tessel = require('tessel');
+const path = require('path');
 const av = require('tessel-av');
-// const weather = require('weather-js');
-const mp3 = path.join('/Users/admin/webdev/JS/learn-js/fullstack/workshops/tessel-hackathon/', 'yoda-mudhole.mp3');
-// const purpleRain = path.join(__dirname, '')
+const accel = require('accel-mma84')
+const weather = require('weather-js');
+const Twit = require('twit');
 
-// const yap = require('youtube-audio-player');
-const sound = new av.Player();
-// const player = new av.Player(mp3);
-sound.play(mp3)
+const purpleRain = path.join(__dirname, 'purple-rain.mp3');
+const soundPurp = new av.Player(purpleRain);
 
-// const songsDict = {
-//     sunny: 'https://www.youtube.com/watch?v=iPUmE-tne5U',
-//     rainy: 'https://www.youtube.com/watch?v=IE9_JUDBPGM',
-//     snowy: 'https://www.youtube.com/watch?v=yXQViqx6GMY',
-//     cloudy: 'https://www.youtube.com/watch?v=3Fmo8I_XSCI'
-// }
+const sunshine = path.join(__dirname, 'sunshine.mp3');
+const soundSun = new av.Player(sunshine);
 
-// weather.find({
-//     search: 'New York, NY',
-//     degreeType: 'F'
-// }, (err, result) => {
-//     if (err) console.log(err);
-//     let temp = JSON.stringify(result[0].current.temperature, null, 2);
-//     let forecast = JSON.stringify(result[0].current.skytext);
+const speak = new av.Speaker();
+
+var T = new Twit({
+    consumer_key: 'Ec2yjqikQDVFLihJHwYLcice8',
+    consumer_secret: 'OfIdvpTQsBqpIHoDkAxiW5x6SISXqcj70yXj9IERSGEBpWZAfi',
+    access_token: '280692030-Hj8z5Th7Dol2IMmLmIPq24AZekrZmhDUWsqeHRxk',
+    access_token_secret: 'L0oHMcF9DSDHsc2Yx80UIBkiPsJwgrWJ81df9AuouqrP4',
+    timeout_ms: 60 * 1000,  // optional HTTP request timeout to apply to all requests. 
+})
+
+weather.find({
+    search: 'New York, NY',
+    degreeType: 'F'
+}, (err, result) => {
+    if (err) console.log(err);
+    let temp = JSON.stringify(result[0].current.temperature, null, 2);
+    let forecast = JSON.stringify(result[0].current.skytext);
     
-//     let song;
-//     if (forecast.toLowerCase().includes('sunny')) song = 'sunny';
+    let song;
+    if (forecast.toLowerCase() === 'sunny') {
+        T.post('statuses/update', { status: 'its sunny out' }, function(err, data, response) {
+            if (err) console.log(err);
+            console.log(data)
+        })
+        speak.say(`The temperature is ${temp} and the forecast is ${forecast}`);
+        // soundSun.play();
+    }
 
-    // sound.say(`The temperature is ${temp} and the forecast is ${forecast}`);
-    // yap.play({ url: songsDict[song] });
+    else if (forecast.toLowerCase() === 'rainy') {
+        T.post('statuses/update', { status: 'its rainy out' }, function (err, data, response) {
+            if (err) console.log(err);
+            console.log(data)
+        })
+        speak.say(`The temperature is ${temp} and the forecast is ${forecast}`);
+        // soundPurp.play();
+    }
 
-// })
+    else {
+        T.post('statuses/update', { status: 'idk the weather' }, function (err, data, response) {
+            if (err) console.log(err);
+            console.log(data)
+        })
+        speak.say(`The temperature is ${temp} and the forecast is ${forecast}`);
+        // soundSun.play();
+    }
+});
 
